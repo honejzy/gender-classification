@@ -1,0 +1,55 @@
+stages:
+
+  concat_data:
+    # first stage -> input from data/raw
+    cmd: python3 -m gender_classification.data.make_dataset 
+          --task concatenate_data 
+          --input "data/raw/validated.tsv data/raw/dev.tsv data/raw/test.tsv data/raw/train.tsv"
+          --output data/interim/manifest.concatenated.csv
+    deps:
+      - data/raw/validated.tsv
+      - data/raw/dev.tsv
+      - data/raw/test.tsv
+      - data/raw/train.tsv
+      - gender_classification/data/make_dataset.py
+    outs:
+      - data/interim/manifest.concatenated.csv
+
+  drop_duplicates:
+    # second stage -> input from data/interim
+    cmd: python3 -m gender_classification.data.make_dataset 
+          --task drop_duplicates 
+          --input data/interim/manifest.concatenated.csv
+          --output data/interim/manifest.dropped-duplicates.csv
+    deps:
+      - data/interim/manifest.concatenated.csv
+      - gender_classification/data/make_dataset.py
+    outs:
+      - data/interim/manifest.dropped-duplicates.csv
+
+  # third stage -> input to data/interim
+  drop_invalid_classes:
+    cmd: python3 -m gender_classification.data.make_dataset 
+          --task drop_invalid_classes 
+          --input data/interim/manifest.dropped-duplicates.csv
+          --output data/interim/manifest.dropped-duplicates-invalid-class.csv
+    deps:
+      - data/interim/manifest.dropped-duplicates.csv
+      - gender_classification/data/make_dataset.py
+    outs:
+      - data/interim/manifest.dropped-duplicates-invalid-class.csv
+
+  # final stage -> output to data/processed
+  delete_short_audio:
+    cmd: python3 -m gender_classification.data.make_dataset 
+          --task split_to_train_test 
+          --input data/interim/manifest.dropped-duplicates-invalid-class.csv
+          --output "data/processed/train.csv data/processed/test.csv"
+    deps:
+      - data/interim/manifest.dropped-duplicates-invalid-class.csv
+      - gender_classification/data/make_dataset.py
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  

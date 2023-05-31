@@ -1,0 +1,84 @@
+best_cnn: &best_cnn 'experiments/results_cnn/baseline/train/002_with_augs/weights/best.pt'
+classes:
+  - male
+  - female
+
+augmentation: &augmentation
+    name: [freq_mask, time_mask]
+    freq_mask:
+        freq_mask_param: 10
+    time_mask:
+        time_mask_param: 20
+    time_stretch:
+        time_stretch_rate: 0.8
+
+feature_extractor: &feature_extractor
+    name: spectrogram
+    spectrogram:
+        n_fft: 400
+        hop_length: 160
+        normalized: False
+        power: 2.0
+    augmentation: *augmentation
+
+model:
+    sample_rate: 16000
+    name: cnn
+    cnn:
+        best_model: *best_cnn
+        feature_extractor: *feature_extractor
+        num_conv_layers: &cnn_layers 3
+        conv1:
+            in_channels: 1
+            out_channels: 32
+            kernel_size: 3
+            padding: 1
+        conv2:
+            in_channels: 32
+            out_channels: 64
+            kernel_size: 3
+            padding: 1
+        conv3:
+            in_channels: 64
+            out_channels: 128
+            kernel_size: 3
+            padding: 1
+        pool:
+            kernel_size: 2
+            stride: 2
+        fc1:
+            in_features: 118400
+            out_features: 256
+        fc2:
+            in_features: 256
+            out_features: 2
+
+dataset:
+    train: "data/processed/train_best_balanced_wav.csv"
+    test: "data/processed/test_best_balanced_wav.csv"
+    batch_size: 32 
+    max_len_sample: 3
+    num_workers: 8
+
+train:
+    loss: &loss 'CrossEntropyLoss'
+    num_epochs: 10
+    save_dir: 'experiments/results_cnn'
+    log_file: 'train.log'
+    logging_steps: 250
+
+optimizer:
+    name: Adam
+    params:
+        lr: 0.001
+
+manager:
+    mlflow:
+        url: 
+    clearml:
+        key_token: 
+        secret_token: 
+        subproject: True  # experiment format
+    hparams:
+        cnn_layers: *cnn_layers
+        loss: *loss
