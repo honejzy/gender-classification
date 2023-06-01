@@ -10,7 +10,6 @@
 - [Install](#install)
 - [Train](#train)
 - [Inference](#inference)
-- [Test](#built_using)
 - [Data](#data)
 - [Best models](models/README.md)
 - [TODO](#todo)
@@ -25,7 +24,7 @@ CNN
 ## Install   
 Firstly, clone project  
 ```bash
-git clone ...
+git clone https://github.com/honejzy/gender-classification
  ```   
 Create docker image from Dockerfile
 ```bash
@@ -74,9 +73,6 @@ python3 -m gender_classification.scripts.inference --config gender_classificatio
 
 python3 -m gender_classification.scripts.inference --config gender_classification/config/config.yaml --csv_folder PATH/TO/CSV_FOLDER
 ```
-
-## Test
-Not implemented yet
 
 ## Data
 [Data format](docs/data.md) <br/>
